@@ -54,6 +54,7 @@ const uploadCoverPic = multer({storage:storageCoverPic})
 const sendVeritication = async (email,firstName,host,protocol) => {
     const token = jwt.sign(email,'sphinx')
     const link = `${protocol}://${host}/users/verify/${token}`
+    console.log(link)
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -86,25 +87,27 @@ const sendVeritication = async (email,firstName,host,protocol) => {
 
 
 router.post('/signup',async(req,res) => {
-    const {firstName,lastName,email,password,birthday} = req.body
-    const host = req.get('host')
-    const protocol = req.protocol
-    const user = (await pool.query('SELECT 1 FROM users WHERE email = $1',[email])).rows[0]
-    if(user) return res.status(400).json({
-        error:'That Email address already exists'
-    })
-    const name = `${firstName[0].toUpperCase()}${firstName.slice(1).toLowerCase()} ${lastName[0].toUpperCase()}${lastName.slice(1).toLowerCase()}`
-    const hashPassword = await bcrypt.hash(password,5)
-    const uid = (await pool.query('INSERT INTO users(name,email,password) VALUES($1,$2,$3) RETURNING uid',[name,email,hashPassword])).rows[0].uid
-    await pool.query('INSERT INTO user_birthday(uid,birthday) VALUES($1,$2)',[uid,birthday])
-    await pool.query('INSERT INTO user_bio(uid) VALUES($1)',[uid])
-    await sendVeritication(email,firstName,host,protocol)
-
-
-    const token = jwt.sign(uid,'sphinx')
-    return res.status(200).json({
-        token
-    })
+    try {
+        const {firstName,lastName,email,password,birthday} = req.body
+        const host = req.get('host')
+        const protocol = req.protocol
+        const user = (await pool.query('SELECT 1 FROM users WHERE email = $1',[email])).rows[0]
+        if(user) return res.status(400).json({
+            error:'That Email address already exists'
+        })
+        const name = `${firstName[0].toUpperCase()}${firstName.slice(1).toLowerCase()} ${lastName[0].toUpperCase()}${lastName.slice(1).toLowerCase()}`
+        const hashPassword = await bcrypt.hash(password,5)
+        const uid = (await pool.query('INSERT INTO users(name,email,password) VALUES($1,$2,$3) RETURNING uid',[name,email,hashPassword])).rows[0].uid
+        await pool.query('INSERT INTO user_birthday(uid,birthday) VALUES($1,$2)',[uid,birthday])
+        await pool.query('INSERT INTO user_bio(uid) VALUES($1)',[uid])
+        await sendVeritication(email,firstName,host,protocol)
+        const token = jwt.sign(uid,'sphinx')
+        return res.status(200).json({
+            token
+        })
+    } catch (error) {
+        res.sendStatus(500)
+    }
 })
 
 
