@@ -9,10 +9,12 @@ const path = require('path')
 const socketIo = require('socket.io')
 const pool = require('./db')
 
+require('dotenv').config()
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(express.static(path.join(__dirname,'static')))
+
 
 
 
@@ -22,8 +24,8 @@ app.use('/stories/',storyRoutes)
 app.use('/notifications/',notificationRoutes)
 
 
-app.get('*',(req,res) => {
-    res.send('omar')
+app.get('/test',(req,res) => {
+    res.send(process.env.TEST)
 })
 
 
