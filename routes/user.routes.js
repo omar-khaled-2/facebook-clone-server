@@ -52,6 +52,7 @@ const uploadCoverPic = multer({storage:storageCoverPic})
 
 
 const sendVeritication = async (email,firstName,host,protocol) => {
+    console.log(firstName,host,protocol,email)
     const token = jwt.sign(email,'sphinx')
     const link = `${protocol}://${host}/users/verify/${token}`
     console.log(link)
@@ -107,7 +108,7 @@ router.post('/signup',async(req,res) => {
         })
     } catch (error) {
         res.status(500).json({
-            error:error.message
+            error:error.messages
         })
     }
 })
