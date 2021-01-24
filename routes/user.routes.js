@@ -106,7 +106,9 @@ router.post('/signup',async(req,res) => {
             token
         })
     } catch (error) {
-        res.sendStatus(500)
+        res.status(500).json({
+            error:error
+        })
     }
 })
 
