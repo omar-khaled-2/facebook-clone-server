@@ -52,7 +52,6 @@ const uploadCoverPic = multer({storage:storageCoverPic})
 
 
 const sendVeritication = async (email,firstName,host,protocol) => {
-    console.log(firstName,host,protocol,email)
     const token = jwt.sign(email,'sphinx')
     const link = `${protocol}://${host}/users/verify/${token}`
     console.log(link)
@@ -63,7 +62,7 @@ const sendVeritication = async (email,firstName,host,protocol) => {
           pass: process.env.PASSWORD
         }
     })
-    await transporter.sendMail({
+    const a = await transporter.sendMail({
         to:email,
         from: process.env.EMAIL,
         subject: "Verify your E-mail",
@@ -77,6 +76,7 @@ const sendVeritication = async (email,firstName,host,protocol) => {
           </head>
           <body style="min-width:300px;align-items: center;background:#f0f2f5;display: flex;flex-direction: column;flex:1">
             <h1 style='color:#1877f2'>Facebook</h1>
+            <h4>dear ${firstName}</h4>
             <h3 style="margin-bottom:50px ;">Verify your email address</h3>
             <a href="${link}" target="_blank" rel="noopener noreferrer" style=><button style="height: 50px;width: 150px;border: none;outline:none;background:#1877F2;color:white;font-weight:bold">Verify Your Email</button></a>
           </body>
@@ -106,10 +106,9 @@ router.post('/signup',async(req,res) => {
         return res.status(200).json({
             token
         })
+
     } catch (error) {
-        res.status(500).json({
-            error:error.message
-        })
+        res.status(500)
     }
 })
 
